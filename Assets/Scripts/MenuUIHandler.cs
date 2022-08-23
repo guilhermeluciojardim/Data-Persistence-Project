@@ -9,7 +9,7 @@ using UnityEditor;
 
 public class MenuUIHandler : MonoBehaviour
 {
-
+    [SerializeField] InputField nameField;
     public void StartNew(){
         SceneManager.LoadScene(1);
     }
@@ -21,8 +21,7 @@ public class MenuUIHandler : MonoBehaviour
             Application.Quit();
         #endif
     }
-        public void NewNameEntered(string name)
-    {
-        NameManager.Instance.playerName = name;
-    }
+     public void UpdateName(){
+        NameManager.Instance.CurrentPlayer = nameField.text;
+     }
 }

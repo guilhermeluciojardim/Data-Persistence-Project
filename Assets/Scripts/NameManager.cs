@@ -2,26 +2,70 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 
 public class NameManager : MonoBehaviour
 {
     public static NameManager Instance;
 
-    public string playerName;
+   public string CurrentPlayer;
+    public int CurrentScore;
+    public int HighScore;
+    public string PreviousPlayer;
 
     private void Awake()
     {
-        
-        if (Instance != null)
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
         {
             Destroy(gameObject);
-            return;
         }
-        
-    Instance = this;
-    DontDestroyOnLoad(gameObject);
+
+        LoadGameData();
     }
-    public void SetName(Text name){
-        NameManager.Instance.playerName = name.text;
+
+    public string GetPreviousScoreText()
+    {
+        if (CurrentScore > HighScore)
+        {
+            HighScore = CurrentScore;
+            PreviousPlayer = CurrentPlayer;
+            SaveGameData();
+        }
+        return $"Best Score : {NameManager.Instance?.HighScore} ({NameManager.Instance?.PreviousPlayer})";
+    }
+
+    [System.Serializable]
+    class SaveData
+    {
+        public string PlayerName;
+        public int HighScore;
+    }
+
+    private void SaveGameData()
+    {
+        SaveData data = new SaveData();
+        data.HighScore = HighScore;
+        data.PlayerName = CurrentPlayer;
+
+        string json = JsonUtility.ToJson(data);
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
+    private void LoadGameData()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+
+            PreviousPlayer = data.PlayerName;
+            HighScore = data.HighScore;
+        }
     }
 }
